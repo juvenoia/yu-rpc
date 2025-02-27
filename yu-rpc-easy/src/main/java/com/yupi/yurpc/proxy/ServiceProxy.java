@@ -5,6 +5,7 @@ import cn.hutool.http.HttpResponse;
 import com.yupi.yurpc.model.RpcRequest;
 import com.yupi.yurpc.model.RpcResponse;
 import com.yupi.yurpc.serializer.JdkSerializer;
+import com.yupi.yurpc.serializer.Serializer;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -14,7 +15,7 @@ public class ServiceProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        JdkSerializer serializer = new JdkSerializer();
+        Serializer serializer = new JdkSerializer();
 
         RpcRequest rpcRequest = RpcRequest.builder()
                 .serviceName(method.getDeclaringClass().getName())

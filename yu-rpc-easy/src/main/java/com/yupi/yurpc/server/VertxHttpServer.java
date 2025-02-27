@@ -9,12 +9,7 @@ public class VertxHttpServer implements HttpServer {
         Vertx vertx = Vertx.vertx();
         io.vertx.core.http.HttpServer server = vertx.createHttpServer();
 
-        server.requestHandler(req -> {
-            System.out.println("Request received: " + req.method() + "" + req.uri());
-            req.response()
-                    .putHeader("content-type", "text/plain")
-                    .end("Hello from Vert.x HTTP Server!");
-        });
+        server.requestHandler(new HttpServerHandler());
 
         server.listen(port, result -> {
             if (result.succeeded()) {
