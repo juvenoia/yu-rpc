@@ -11,5 +11,8 @@ public interface Registry {
     void register(ServiceMetaInfo serviceMetaInfo) throws Exception;
     void unRegister(ServiceMetaInfo serviceMetaInfo);
     List<ServiceMetaInfo> serviceDiscovery(String serviceKey);
-    void destry();
+    void destroy();
+
+    void heartBeat();
+    void watch(String serviceNodeKey);
 }
