@@ -8,6 +8,8 @@ import com.yupi.yurpc.Config.RegistryConfig;
 import com.yupi.yurpc.Config.RpcConfig;
 import com.yupi.yurpc.RpcApplication;
 import com.yupi.yurpc.constant.RpcConstant;
+import com.yupi.yurpc.loadbalancer.LoadBalancer;
+import com.yupi.yurpc.loadbalancer.LoadBalancerFactory;
 import com.yupi.yurpc.model.RpcRequest;
 import com.yupi.yurpc.model.RpcResponse;
 import com.yupi.yurpc.model.ServiceMetaInfo;
@@ -27,7 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -60,7 +64,11 @@ public class ServiceProxy implements InvocationHandler {
             if (CollUtil.isEmpty(serviceMetaInfos)) {
                 throw new RuntimeException("暂无服务地址");
             }
-            ServiceMetaInfo selectedServiceMetaInfo = serviceMetaInfos.get(0);
+
+            LoadBalancer loadBalancer = LoadBalancerFactory.getInstanc(RpcApplication.getRpcConfig().getLoadBalancer());
+            Map<String, Object> requestParam = new HashMap<String, Object>();
+            requestParam.put("methodName", rpcRequest.getMethodName());
+            ServiceMetaInfo selectedServiceMetaInfo = loadBalancer.select(requestParam, serviceMetaInfos);
 
             Vertx vertx = Vertx.vertx();
             NetClient netClient = vertx.createNetClient();

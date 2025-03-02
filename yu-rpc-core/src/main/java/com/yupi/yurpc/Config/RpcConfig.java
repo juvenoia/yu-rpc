@@ -1,5 +1,7 @@
 package com.yupi.yurpc.Config;
 
+import com.yupi.yurpc.loadbalancer.LoadBalancer;
+import com.yupi.yurpc.loadbalancer.LoadBalancerKeys;
 import com.yupi.yurpc.serializer.SerializerKeys;
 import lombok.Data;
 
@@ -12,4 +14,5 @@ public class RpcConfig {
     private boolean mock = false;
     private String serializer = SerializerKeys.JDK;
     private RegistryConfig registryConfig = new RegistryConfig();
+    private String loadBalancer = LoadBalancerKeys.ROUND_ROBIN;
 }
