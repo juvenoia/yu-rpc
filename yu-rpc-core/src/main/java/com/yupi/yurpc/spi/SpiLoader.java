@@ -63,8 +63,6 @@ public class SpiLoader {
                         if (split.length > 1) {
                             String key = split[0];
                             String className = split[1];
-                            System.out.println(key);
-                            System.out.println(className);
                             keyClassMap.put(key, Class.forName(className));
                         }
                     }

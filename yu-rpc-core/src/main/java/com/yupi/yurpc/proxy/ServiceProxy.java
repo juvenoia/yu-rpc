@@ -1,24 +1,36 @@
 package com.yupi.yurpc.proxy;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import com.yupi.yurpc.Config.RegistryConfig;
+import com.yupi.yurpc.Config.RpcConfig;
 import com.yupi.yurpc.RpcApplication;
+import com.yupi.yurpc.constant.RpcConstant;
 import com.yupi.yurpc.model.RpcRequest;
 import com.yupi.yurpc.model.RpcResponse;
+import com.yupi.yurpc.model.ServiceMetaInfo;
+import com.yupi.yurpc.registry.Registry;
+import com.yupi.yurpc.registry.RegistryFactory;
 import com.yupi.yurpc.serializer.JdkSerializer;
 import com.yupi.yurpc.serializer.Serializer;
 import com.yupi.yurpc.serializer.SerializerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 
+@Slf4j
 public class ServiceProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         Serializer serializer = SerializerFactory.getInstance(RpcApplication.getRpcConfig().getSerializer());
+
+        String serviceName = method.getDeclaringClass().getName();
 
         RpcRequest rpcRequest = RpcRequest.builder()
                 .serviceName(method.getDeclaringClass().getName())
@@ -28,11 +40,25 @@ public class ServiceProxy implements InvocationHandler {
                 .build();
 
         byte[] bodyBytes = serializer.serialize(rpcRequest);
-        try (HttpResponse httpResponse = HttpRequest.post("http://localhost:8080")
+
+        RpcConfig rpcConfig = RpcApplication.getRpcConfig();
+        Registry registry = RegistryFactory.getInstance(rpcConfig.getRegistryConfig().getRegistry());
+        ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
+        serviceMetaInfo.setServiceName(serviceName);
+        serviceMetaInfo.setServiceVersion(RpcConstant.DEFAULT_SERVICE_VERSION);
+
+        List<ServiceMetaInfo> serviceMetaInfos = registry.serviceDiscovery(serviceMetaInfo.getServiceKey());
+        if (CollUtil.isEmpty(serviceMetaInfos)) {
+            throw new RuntimeException("暂无服务地址");
+        }
+        ServiceMetaInfo selectedServiceMetaInfo = serviceMetaInfos.get(0);
+        log.info("selected service: {}", selectedServiceMetaInfo.getServiceAddress());
+        try (HttpResponse httpResponse = HttpRequest.post(selectedServiceMetaInfo.getServiceAddress())
                 .body(bodyBytes)
                 .execute();) {
             byte[] result = httpResponse.bodyBytes();
             RpcResponse deserialize = serializer.deserialize(result, RpcResponse.class);
+            log.info("return data: {}", deserialize.getData());
             return deserialize.getData();
         } catch (IOException e) {
             e.printStackTrace();
