@@ -1,2 +1,2 @@
-no=com.yupi.yurpc.fault.retry.NoRetryStrategy
-fixedInterval=com.yupi.yurpc.fault.retry.FixedIntervalRetryStrategy
+no=com.yupi.yurpc.retry.NoRetryStrategy
+fixedInterval=com.yupi.yurpc.retry.FixedIntervalRetryStrategy

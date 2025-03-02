@@ -123,7 +123,7 @@ public class ServiceProxy implements InvocationHandler {
             return rpcResponse.getData();
 
         } catch (Exception e) {
-            TolerantStrategy instance = TolerantStrategyFactory.getInstance(RpcApplication.getRpcConfig().getRetryStrategy());
+            TolerantStrategy instance = TolerantStrategyFactory.getInstance(RpcApplication.getRpcConfig().getTolerantStrategy());
             RpcResponse rpcResponse = instance.doTolerant(null, e);
         }
         return null;
