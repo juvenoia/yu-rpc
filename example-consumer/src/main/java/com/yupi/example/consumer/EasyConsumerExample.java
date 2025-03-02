@@ -17,5 +17,8 @@ public class EasyConsumerExample {
         } else {
             System.out.println("username:" + newUser.getName());
         }
+
+        short number = userService.getNumber();
+        System.out.println(number);
     }
 }
